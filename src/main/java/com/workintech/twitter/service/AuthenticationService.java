@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -35,7 +36,7 @@ public class AuthenticationService {
         this.tokenService = tokenService;
     }
 
-    public User register(String email, String password){
+    public User register(String email, String password, String userPassword, Date dateOfBirth){
         Optional<User> foundUser = userRepository.findUserByEmail(email);
         if(foundUser.isPresent()){
             throw new TweetErrorException("User is not valid", HttpStatus.BAD_REQUEST);
@@ -58,10 +59,10 @@ public class AuthenticationService {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password));
             String token = tokenService.generateJwtToken(auth);
-            return new LoginResponse(token);
+            return new LoginResponse(userRepository.findUserByEmail(email).get(), token);
         } catch (Exception ex){
             ex.printStackTrace();
-            return new LoginResponse("");
+            throw new RuntimeException("User credentials are not valid");
         }
     }
 }
