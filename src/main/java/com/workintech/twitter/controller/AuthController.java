@@ -2,6 +2,7 @@ package com.workintech.twitter.controller;
 
 import com.workintech.twitter.dto.LoginRequest;
 import com.workintech.twitter.dto.LoginResponse;
+import com.workintech.twitter.dto.RegistrationUser;
 import com.workintech.twitter.entity.User;
 import com.workintech.twitter.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,11 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
-        return authenticationService.register(user.getName(),
-                user.getEmail(), user.getPassword(), user.getDateOfBirth());
+    public User register(@RequestBody RegistrationUser registrationUser) {
+        return authenticationService.register(registrationUser.getName(), registrationUser.getEmail(),
+                registrationUser.getPassword(), registrationUser.getDob());
     }
-    @PostMapping("/login")
+   @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest loginRequest) {
         return authenticationService.login(loginRequest.getEmail(), loginRequest.getPassword());
     }

@@ -14,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -52,30 +53,15 @@ public class SecurityConfig {
         return NimbusJwtDecoder.withPublicKey(keys.getPublicKey()).build();
     }
 
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     @Bean
     public JwtEncoder jwtEncoder(){
         JWK jwk = new RSAKey.Builder(keys.getPublicKey()).privateKey(keys.getPrivateKey()).build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
     }
-
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -100,18 +86,33 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.csrf(csrf -> csrf.disable())
-                .cors()
-                .and()
-                .authorizeHttpRequests(auth -> {
+        http.csrf(csrf -> csrf.disable());
+                http.authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/profile/**").permitAll();
-                    auth.requestMatchers(HttpMethod.GET, "/tweet/**")
-                            .hasAnyRole("USER", "ADMIN");
-                    auth.requestMatchers(HttpMethod.POST, "/tweet/**")  .hasAnyRole("USER", "ADMIN");
-                    auth.requestMatchers(HttpMethod.PUT, "/tweet/**")  .hasAnyRole("USER", "ADMIN");
-                    auth.requestMatchers(HttpMethod.DELETE, "/tweet/**")  .hasAnyRole("USER", "ADMIN");
+                    auth.requestMatchers(HttpMethod.GET, "/tweet/**", "/user/**").hasRole("USER");
+                    auth.requestMatchers(HttpMethod.POST, "/tweet/**").hasRole("USER");
+                    auth.requestMatchers(HttpMethod.PUT, "/tweet/**").hasRole("USER");
+                    auth.requestMatchers(HttpMethod.DELETE, "/tweet/**") .hasRole("USER");
+                    auth.anyRequest().authenticated();
                 })
-                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-                .build();
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
+                http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                http.cors().configurationSource(corsConfigurationSource());
+                //.httpBasic(Customizer.withDefaults())
+                //.oauth2Login(Customizer.withDefaults());
+               return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

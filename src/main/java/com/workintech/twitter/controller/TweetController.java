@@ -55,7 +55,7 @@ public class TweetController {
         CommentResponse commentResponse = new CommentResponse();
         commentResponse.setTweetId(tweet.getId());
         commentResponse.setUserId(comment.getUser().getId());
-        commentResponse.setText(comment.getPost());
+        commentResponse.setText(comment.getText());
         commentResponse.setEmail(comment.getUser().getEmail());
         commentResponse.setCommentId(comment.getId());
         return commentResponse;

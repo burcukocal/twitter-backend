@@ -30,17 +30,15 @@ public class CommentController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<CommentResponse> createReply(@PathVariable int id, @RequestBody CommentRequest commentRequest) {
-
+    public ResponseEntity<CommentResponse> createComment(@PathVariable int id, @RequestBody CommentRequest commentRequest) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = authentication.getName();
-
-        Tweet foundTweet= tweetService.findById(id);
         User user = userService.findUserByEmail(userEmail);
-        Comment comment = new Comment();
+        Tweet foundTweet= tweetService.findById(id);
 
+        Comment comment = new Comment();
         comment.setTweet(foundTweet);
-        comment.setPost(commentRequest.getText());
+        comment.setText(commentRequest.getText());
         comment.setUser(user);
         commentService.write(foundTweet.getId(), comment);
 
@@ -48,11 +46,12 @@ public class CommentController {
         commentResponse.setTweetId(foundTweet.getId());
         commentResponse.setUserId(user.getId());
         commentResponse.setText(commentRequest.getText());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(commentResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReply(@PathVariable int id) {
+    public ResponseEntity<Void> deleteComment(@PathVariable int id) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = authentication.getName();

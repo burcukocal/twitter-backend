@@ -14,8 +14,8 @@ public class Comment {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "post")
-    private String post;
+    @Column(name = "text")
+    private String text;
 
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE,
             CascadeType.PERSIST, CascadeType.REFRESH})

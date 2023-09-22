@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Data
@@ -27,14 +28,8 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "phone", unique = true)
-    private String phone;
-
-    @Column(name = "username", unique = true)
-    private String username;
-
-    @Column(name = "date_of_birth")
-    private Date dateOfBirth;
+    @Column(name = "dob")
+    private String dob;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Tweet> tweets;
@@ -50,7 +45,7 @@ public class User implements UserDetails {
 
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_role", schema = "twitter",
+    @JoinTable(name = "user_role", schema = "clone",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
     private Set<Role> authorities = new HashSet<>();
@@ -67,7 +62,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override

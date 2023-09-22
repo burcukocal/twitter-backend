@@ -32,7 +32,6 @@ public class LikeController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userEmail = authentication.getName();
 
-
         Tweet tweet= tweetService.findById(tweetId);
         User user = userService.findUserByEmail(userEmail);
 
